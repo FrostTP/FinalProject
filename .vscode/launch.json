@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TimeGuard",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "toolArgs": [
+        "--dart-define=GOOGLE_WEB_CLIENT_ID=563227805774-fuujkq4d8ham9i1p448t32rd005ub1sd.apps.googleusercontent.com"
+      ]
+    }
+  ]
+}

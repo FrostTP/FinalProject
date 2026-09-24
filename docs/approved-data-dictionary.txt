@@ -1,0 +1,414 @@
+IMPORTANT DATABASE CORRECTION
+
+I already have an approved Data Dictionary for this project.
+
+From now on, this Data Dictionary is the SOURCE OF TRUTH.
+
+Do NOT redesign the database based on the previous suggested schema.
+Refactor any database, PHP API, Dart models, services, queries and
+relationships already created so they match this structure.
+
+Do not merge tables unless I explicitly request it.
+
+==================================================
+DATABASE TABLES
+==================================================
+
+Use these 11 main tables.
+
+1. E - Employee
+
+employee_id varchar(10) PK
+full_name varchar(100)
+email varchar(100)
+google_uid varchar(50)
+phone varchar(15)
+department_id varchar(10) FK -> D.department_id
+status varchar(20)
+created_date date
+
+IMPORTANT:
+Employees use Google OAuth for mobile login.
+Do NOT add employee password unless explicitly requested.
+
+==================================================
+
+2. A - Admin
+
+admin_id varchar(10) PK
+full_name varchar(100)
+username varchar(50)
+password_hash varchar(255)
+email varchar(100)
+phone varchar(15)
+status varchar(20)
+last_login_date datetime
+created_date date
+
+==================================================
+
+3. H - HR
+
+hr_id varchar(10) PK
+full_name varchar(100)
+username varchar(50)
+password_hash varchar(255)
+email varchar(100)
+phone varchar(15)
+status varchar(20)
+last_login_date datetime
+created_date date
+
+==================================================
+
+4. S - Supervisor
+
+supervisor_id varchar(10) PK
+full_name varchar(100)
+username varchar(50)
+password_hash varchar(255)
+email varchar(100)
+phone varchar(15)
+department_id varchar(10) FK -> D.department_id
+status varchar(20)
+last_login_date datetime
+created_date date
+
+Admin, HR and Supervisor authenticate through the Backoffice system
+using username/password.
+
+Use password_hash() and password_verify() in PHP.
+
+==================================================
+
+5. D - Department
+
+department_id varchar(10) PK
+department_name varchar(100)
+department_code varchar(20)
+description varchar(255)
+status varchar(20)
+created_date date
+
+==================================================
+
+6. CFG - System Configuration
+
+config_id varchar(10) PK
+config_name varchar(100)
+start_time time
+start_late time
+description varchar(255)
+updated_date datetime
+config_type varchar(20)
+
+Use this table for system configuration such as:
+- standard work start time
+- late threshold
+- other configuration values
+
+==================================================
+
+7. F - Face Biometric
+
+biometric_id varchar(10) PK
+user_id varchar(10) FK -> E.employee_id
+face_image varchar(255)
+face_encoding text
+registration_date datetime
+approval_status varchar(20)
+approved_by varchar(10) FK -> H.hr_id
+approved_date datetime
+status varchar(20)
+
+This project uses FACE RECOGNITION.
+
+face_image:
+path/reference to registered face image.
+
+face_encoding:
+facial embedding/vector used to compare faces.
+
+Approval flow:
+
+Employee registers face
+→ pending approval
+→ HR reviews
+→ approved / rejected
+
+Do NOT replace this design with fingerprint/local_auth only.
+
+local_auth may be used as optional device security,
+but the project's primary biometric technology is Face Recognition.
+
+==================================================
+
+8. G - Geofence Area
+
+area_id varchar(10) PK
+area_name varchar(100)
+department_id varchar(10) FK -> D.department_id
+polygon_coordinates text
+center_latitude decimal(10,6)
+center_longitude decimal(10,6)
+status varchar(20)
+created_date datetime
+
+IMPORTANT:
+
+The project uses POLYGON GEOFENCING.
+
+polygon_coordinates should store coordinates as JSON.
+
+Example:
+
+[
+  {"lat":16.4321,"lng":102.8234},
+  {"lat":16.4325,"lng":102.8240},
+  {"lat":16.4318,"lng":102.8245}
+]
+
+Do NOT replace Polygon Geofence with radius-only geofence.
+
+Create reusable point-in-polygon validation.
+
+Flutter may display the polygon.
+
+PHP backend must also verify whether the employee's current GPS
+coordinate is inside the permitted polygon.
+
+==================================================
+
+9. EA - Employee Work Area
+
+employee_area_id varchar(10) PK
+employee_id varchar(10) FK -> E.employee_id
+area_id varchar(10) FK -> G.area_id
+is_primary boolean
+effective_date date
+end_date date nullable
+status varchar(20)
+
+Rules:
+
+An employee:
+- can have multiple assigned areas
+- can have only one primary area
+- may have secondary areas
+
+Only active assignments whose date range is valid may be used for
+attendance validation.
+
+==================================================
+
+10. OS - Offsite Work Request
+
+offsite_request_id varchar(10) PK
+employee_id varchar(10) FK -> E.employee_id
+request_date datetime
+work_date_start date
+work_date_end date
+location_description varchar(255)
+reason varchar(255)
+approval_status varchar(20)
+approved_by varchar(10) FK -> S.supervisor_id
+approved_date datetime
+
+Approval statuses:
+
+รออนุมัติ
+อนุมัติ
+ปฏิเสธ
+
+Employee submits request.
+Supervisor approves/rejects it.
+
+An approved request may allow attendance outside the employee's
+normal geofence during the approved date range.
+
+==================================================
+
+11. AT - Attendance / Time Log
+
+attendance_id varchar(10) PK
+user_id varchar(10) FK -> E.employee_id
+area_id varchar(10) FK -> G.area_id
+check_type varchar(20)
+check_datetime datetime
+latitude decimal(10,6)
+longitude decimal(10,6)
+verification_method varchar(50)
+zone_status varchar(20)
+device_info varchar(100)
+is_late boolean
+evidence_photo varchar(255)
+reason varchar(255)
+approval_status varchar(20)
+approved_by varchar(10) FK -> S.supervisor_id
+approved_date datetime
+offsite_request_id varchar(10) nullable FK -> OS.offsite_request_id
+
+IMPORTANT:
+
+Attendance uses ONE RECORD PER CHECK EVENT.
+
+Do NOT redesign Attendance as:
+
+check_in_time
+check_out_time
+
+inside the same row.
+
+Instead:
+
+Row 1:
+check_type = เข้างาน
+
+Row 2:
+check_type = ออกงาน
+
+Example:
+
+AT0001
+E0001
+G0001
+เข้างาน
+2026-09-17 08:02:00
+
+AT0002
+E0001
+G0001
+ออกงาน
+2026-09-17 17:05:00
+
+Attendance history should pair/display those records in the Flutter UI
+when needed, but database records must follow this Data Dictionary.
+
+==================================================
+CHECK-IN FLOW
+==================================================
+
+Employee presses ลงเวลาเข้างาน
+
+→ obtain GPS
+→ load active EA assignments
+→ load G Polygon
+→ perform Point-In-Polygon check
+→ if outside polygon, check approved OS request
+→ perform Face Recognition
+→ check CFG standard working time
+→ determine is_late
+→ save one AT record with check_type = เข้างาน
+
+==================================================
+CHECK-OUT FLOW
+==================================================
+
+Employee presses ลงเวลาออกงาน
+
+→ obtain GPS
+→ validate work area / approved offsite request
+→ perform Face Recognition
+→ save new AT record
+→ check_type = ออกงาน
+
+Do NOT update the Check-In record.
+
+Create a new Attendance record.
+
+==================================================
+FACE RECOGNITION
+==================================================
+
+Design Face Recognition separately from the PHP CRUD API.
+
+Architecture should support:
+
+Flutter Camera
+       ↓
+Face Image
+       ↓
+Face Recognition API / service
+       ↓
+Face Encoding comparison
+       ↓
+verification result
+       ↓
+PHP Attendance API
+       ↓
+MySQL
+
+Keep:
+
+face_image
+face_encoding
+
+according to table F.
+
+Do not store biometric data that is unrelated to this Data Dictionary.
+
+==================================================
+GEOFENCE VALIDATION
+==================================================
+
+Do not use only:
+
+distance <= radius
+
+because the approved Data Dictionary specifies Polygon Geofence.
+
+Create Point-In-Polygon validation using latitude/longitude.
+
+Validation must occur on the backend as well.
+
+Flutter-side validation is for UI/feedback only.
+
+==================================================
+IMPORTANT RULE
+==================================================
+
+The approved Data Dictionary has priority over the previous prompt.
+
+If previous code has tables such as:
+
+users
+work_areas
+employee_work_areas
+biometric_enrollments
+attendance with check_in/check_out columns
+
+refactor them to match:
+
+E
+A
+H
+S
+D
+CFG
+F
+G
+EA
+OS
+AT
+
+Do NOT silently modify the approved Data Dictionary.
+
+If an additional technical table is genuinely required
+(for example API authentication tokens or notifications),
+keep it clearly separated as a supporting technical table and
+DO NOT replace or modify any of the 11 approved core tables.
+
+Before changing code:
+
+1. Inspect what has already been generated.
+2. Compare it against this Data Dictionary.
+3. List the mismatches briefly.
+4. Refactor SQL.
+5. Refactor PHP APIs.
+6. Refactor Dart models/services.
+7. Update foreign keys.
+8. Preserve the existing UI where possible.
+9. Run flutter analyze.
+10. Fix all introduced errors.
+
+Continue development using this Data Dictionary as the database contract.
