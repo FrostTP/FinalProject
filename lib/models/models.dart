@@ -86,13 +86,13 @@ class WorkArea {
   };
 }
 
-class EmployeeArea {
-  final String employeeAreaId, employeeId, areaId, effectiveDate, status;
+class DepartmentArea {
+  final String departmentAreaId, departmentId, areaId, effectiveDate, status;
   final String? endDate;
   final bool isPrimary;
-  EmployeeArea.fromJson(Json j)
-    : employeeAreaId = j['employee_area_id'],
-      employeeId = j['employee_id'],
+  DepartmentArea.fromJson(Json j)
+    : departmentAreaId = j['department_area_id'],
+      departmentId = j['department_id'],
       areaId = j['area_id'],
       effectiveDate = j['effective_date'],
       status = j['status'],
@@ -103,8 +103,8 @@ class EmployeeArea {
       effectiveDate.compareTo(date) <= 0 &&
       (endDate == null || endDate!.compareTo(date) >= 0);
   Json toJson() => {
-    'employee_area_id': employeeAreaId,
-    'employee_id': employeeId,
+    'department_area_id': departmentAreaId,
+    'department_id': departmentId,
     'area_id': areaId,
     'is_primary': isPrimary,
     'effective_date': effectiveDate,

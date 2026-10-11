@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__.'/../config/face.php';method('POST');$u=employee();if(!isset($checkOut)){fail('Not found',404);}$b=body();
+require_once __DIR__.'/../config/campus.php';
 $lat=number_value($b,'latitude',-90,90);$lng=number_value($b,'longitude',-180,180);number_value($b,'accuracy',0,100);
+$campus=required_campus_area();$insideCampus=point_in_polygon($lat,$lng,$campus['polygon']);
 $device=text_value($b,'device_info',100);$bytes=face_image_bytes($b);
 $face=query("SELECT * FROM face_biometrics WHERE user_id=? AND status='active' AND approval_status='approved'",[$u['id']])->fetch();
 if(!$face){fail('ใบหน้ายังไม่ได้รับอนุมัติจาก HR',403);}
@@ -12,10 +14,10 @@ db()->beginTransaction();query('SELECT employee_id FROM employees WHERE employee
 $current=query("SELECT face_encoding FROM face_biometrics WHERE user_id=? AND status='active' AND approval_status='approved' FOR UPDATE",[$u['id']])->fetch();
 if(!$current||!hash_equals($face['face_encoding'],$current['face_encoding'])){fail('สถานะใบหน้าเปลี่ยน กรุณาลองใหม่',409);}
 $error=transition_error(today_events($u['id']),$checkOut);if($error){fail($error,409);}
-$areaId=null;$offsiteId=null;$areas=active_areas($u['id']);
+$areaId=null;$offsiteId=null;$areas=array_values(array_filter(active_areas($u['id']),fn($area)=>$area['area_id']!==$campus['area_id']&&$area['department_id']===$u['profile']['department_id']));
 if(!$areas){fail('ไม่พบ EA ที่ใช้งานได้ในวันนี้ กรุณาให้ HR มอบหมายพื้นที่ก่อน',403);}
-foreach($areas as $area){$polygon=json_decode($area['polygon_coordinates'],true);if(is_array($polygon)&&polygon_valid($polygon)&&point_in_polygon($lat,$lng,$polygon)){$areaId=$area['area_id'];break;}}
-if($areaId===null){$r=query("SELECT offsite_request_id FROM offsite_work_requests WHERE employee_id=? AND approval_status='อนุมัติ' AND work_date_start<=CURDATE() AND work_date_end>=CURDATE() ORDER BY approved_date DESC LIMIT 1 FOR UPDATE",[$u['id']])->fetch();if(!$r){fail('อยู่นอก Polygon และไม่มีคำขอนอกพื้นที่ที่อนุมัติในวันนี้',403);}$offsiteId=$r['offsite_request_id'];}
+if($insideCampus){foreach($areas as $area){$polygon=json_decode($area['polygon_coordinates'],true);if(is_array($polygon)&&polygon_valid($polygon)&&point_in_polygon($lat,$lng,$polygon)){$areaId=$area['area_id'];break;}}}
+if($areaId===null){$r=query("SELECT offsite_request_id FROM offsite_work_requests WHERE employee_id=? AND approval_status='อนุมัติ' AND work_date_start<=CURDATE() AND work_date_end>=CURDATE() ORDER BY approved_date DESC LIMIT 1 FOR UPDATE",[$u['id']])->fetch();if(!$r){fail($insideCampus?'อยู่นอกพื้นที่แผนกที่ได้รับมอบหมาย และไม่มีคำขอนอกสถานที่ที่อนุมัติในวันนี้':'อยู่นอกขอบเขตมหาวิทยาลัย และไม่มีคำขอนอกสถานที่ที่อนุมัติในวันนี้',403);}$offsiteId=$r['offsite_request_id'];}
 $zone=$areaId===null ? 'outside' : 'inside';
 // AT.area_id remains the employee's assigned reference area when outside it.
 $areaId ??= $areas[0]['area_id'];

@@ -19,12 +19,17 @@ class AttendanceService {
     progress('กำลังตรวจสอบ GPS และ Polygon');
     var p = await LocationService().current();
     final areas = await data.areas();
+    if (areas.isEmpty) {
+      throw const ApiException(
+        'แผนกยังไม่มีพื้นที่ที่ใช้งานได้ กรุณาติดต่อ HR',
+      );
+    }
     if (!areas.any(
           (a) => GeofenceService.contains(p.latitude, p.longitude, a.polygon),
         ) &&
         (await data.requests(active: true)).isEmpty) {
       throw const ApiException(
-        'อยู่นอก Polygon และไม่มีคำขอนอกพื้นที่ที่อนุมัติในวันนี้',
+        'อยู่นอกพื้นที่แผนก และไม่มีคำขอนอกพื้นที่ที่อนุมัติในวันนี้',
       );
     }
     if ((await data.enrollment()).status != 'approved') {

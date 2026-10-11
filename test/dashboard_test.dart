@@ -55,7 +55,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('ลงเวลาเข้างาน'), findsOneWidget);
-    expect(find.text('ไม่พบพื้นที่ปฏิบัติงานที่ได้รับมอบหมาย'), findsOneWidget);
+    expect(find.text('แผนกยังไม่ได้กำหนดพื้นที่ปฏิบัติงาน'), findsOneWidget);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
     auth.dispose();

@@ -1,5 +1,16 @@
 # Private Face Recognition service
 
+## Windows / XAMPP launcher
+
+After installing requirements and configuring the deployed PHP
+`C:\xampp\htdocs\timeguard_api\config\integrations.local.php`, double-click
+`start_service.cmd`. It reads the shared key from PHP settings without printing
+or duplicating it. Keep its window open while using the app. Restart it after
+reboot; do not start a second instance while port 8091 is already in use.
+The launcher defaults to XAMPP PHP and the deployed integrations file. Override
+`TIMEGUARD_PHP_EXE` or `TIMEGUARD_INTEGRATIONS_FILE` for another installation.
+`setuptools<81` is required because face_recognition_models uses pkg_resources.
+
 `server.py` computes dlib/face_recognition embeddings and compares Euclidean distance to a configurable threshold (default 0.5). PHP calls it; Flutter never supplies a trusted embedding or verification boolean. Both registration and attendance require exactly one detected face. Changing the embedding model requires re-enrollment; do not compare vectors from different models.
 
 Install in a separate Python virtual environment, preferably Linux/WSL because dlib's Windows build needs native compilation tools. No dependencies or model runtime have been installed by this refactor.

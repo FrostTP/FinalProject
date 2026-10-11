@@ -1,5 +1,19 @@
 # TimeGuard — Approved Data Dictionary
 
+## เว็บ Back Office (เพิ่ม 1 ตุลาคม 2026)
+
+ซอร์สอยู่ใน `backend/timeguard_admin/` สำหรับ Admin, HR และ Supervisor ใช้ฐานข้อมูล/connection ของ PHP API เดิม มี session/RBAC, Dashboard, พนักงาน/แผนก/เจ้าหน้าที่, Leaflet Polygon, มอบหมายพื้นที่, อนุมัติใบหน้า/นอกสถานที่/ลงเวลา, รายงาน/CSV และตั้งค่าเวลา ดู [คู่มือติดตั้งและสิทธิ์](backend/timeguard_admin/README.md) และ [ผลแต่ละ Phase](backend/timeguard_admin/PHASES.md)
+
+เพิ่มเฉพาะตารางเทคนิค `tech_web_audit_logs` ไม่เปลี่ยน 11 ตารางหลัก, Flutter, Google UID หรือ API มือถือ ติดตั้งผ่าน `backend/install-backoffice.php` และ `backend/deploy-backoffice.ps1` แล้วเปิด `http://localhost/timeguard_admin/`.
+
+ติดตั้งลง XAMPP ที่ `C:/xampp/htdocs/timeguard_admin` และเพิ่มตาราง audit ใน `timeguard_db` เรียบร้อยแล้วตามคำสั่งให้ทำให้เสร็จโดยไม่ทดสอบเพิ่มเติม เข้าใช้ด้วยบัญชี Admin/HR/Supervisor เดิม
+
+## เว็บ Back Office (เพิ่ม 1 ตุลาคม 2026)
+
+ซอร์สอยู่ใน `backend/timeguard_admin/` สำหรับ Admin, HR และ Supervisor ใช้ฐานข้อมูล/connection ของ PHP API เดิม มี session/RBAC, Dashboard, พนักงาน/แผนก/เจ้าหน้าที่, Leaflet Polygon, มอบหมายพื้นที่, อนุมัติใบหน้า/นอกสถานที่/ลงเวลา, รายงาน/CSV และตั้งค่าเวลา ดู [คู่มือติดตั้งและสิทธิ์](backend/timeguard_admin/README.md) และ [ผลแต่ละ Phase](backend/timeguard_admin/PHASES.md)
+
+เพิ่มเฉพาะตารางเทคนิค `tech_web_audit_logs` ไม่เปลี่ยน 11 ตารางหลัก, Flutter, Google UID หรือ API มือถือ ติดตั้งผ่าน `backend/install-backoffice.php` และ `backend/deploy-backoffice.ps1` แล้วเปิด `http://localhost/timeguard_admin/`.
+
 ## ชื่อตารางเต็ม (แก้ไขตามคำสั่งวันที่ 24 กันยายน 2026)
 
 | ชื่อเดิม | ชื่อในฐานข้อมูล |

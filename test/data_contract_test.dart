@@ -25,10 +25,10 @@ void main() {
       expect(GeofenceService.contains(-0.1, 0.5, polygon), isFalse);
     },
   );
-  test('EA date range is inclusive, inactive and future are excluded', () {
-    final assignment = EmployeeArea.fromJson({
-      'employee_area_id': 'EA0001',
-      'employee_id': 'E0001',
+  test('DA date range is inclusive, inactive and future are excluded', () {
+    final assignment = DepartmentArea.fromJson({
+      'department_area_id': 'DA0001',
+      'department_id': 'D0001',
       'area_id': 'G0001',
       'is_primary': 1,
       'effective_date': '2026-09-01',
@@ -39,7 +39,7 @@ void main() {
     expect(assignment.validOn('2026-09-18'), isFalse);
     expect(assignment.validOn('2026-08-31'), isFalse);
     expect(
-      EmployeeArea.fromJson({
+      DepartmentArea.fromJson({
         ...assignment.toJson(),
         'status': 'inactive',
       }).validOn('2026-09-17'),
@@ -83,7 +83,7 @@ void main() {
   test('OS preserves approved Thai status and date range', () {
     final row = {
       'offsite_request_id': 'OS0001',
-      'employee_id': 'E0001',
+      'department_id': 'D0001',
       'request_date': '2026-09-17 08:00:00',
       'work_date_start': '2026-09-17',
       'work_date_end': '2026-09-19',

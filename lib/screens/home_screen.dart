@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'พื้นที่ปฏิบัติงาน',
+                        'พื้นที่ปฏิบัติงานของแผนก',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (areas.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Text('ไม่พบพื้นที่ปฏิบัติงานที่ได้รับมอบหมาย'),
+                          child: Text('แผนกยังไม่ได้กำหนดพื้นที่ปฏิบัติงาน'),
                         ),
                       for (final a in areas)
                         ListTile(

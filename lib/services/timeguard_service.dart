@@ -23,7 +23,7 @@ class TimeGuardService {
   Future<Dashboard> summary() async =>
       Dashboard.fromJson(await api.get('dashboard/summary.php'));
   Future<List<WorkArea>> areas() async =>
-      (await api.get('location/get_employee_area.php') as List)
+      (await api.get('location/get_department_areas.php') as List)
           .map((j) => WorkArea.fromJson(j))
           .toList();
   Future<Enrollment> enrollment() async =>

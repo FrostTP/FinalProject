@@ -1,0 +1,1 @@
+</main><script src="<?=e(url('assets/vendor/bootstrap.bundle.min.js'))?>"></script><script src="<?=e(url('assets/vendor/leaflet.js'))?>"></script><script src="<?=e(url('assets/vendor/leaflet.draw.js'))?>"></script><script src="<?=e(url('assets/js/maps.js'))?>"></script><script src="<?=e(url('assets/js/app.js'))?>"></script></body></html>
