@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
+import 'status_widgets.dart';
+export 'status_widgets.dart';
 
 class Panel extends StatelessWidget {
   final Widget child;
@@ -35,26 +37,6 @@ class StatusBadge extends StatelessWidget {
   }
 }
 
-class ErrorPanel extends StatelessWidget {
-  final Object error;
-  final VoidCallback retry;
-  const ErrorPanel(this.error, this.retry, {super.key});
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.all(24),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.cloud_off_rounded, size: 48, color: Colors.grey),
-        const SizedBox(height: 12),
-        Text(error.toString(), textAlign: TextAlign.center),
-        const SizedBox(height: 16),
-        OutlinedButton(onPressed: retry, child: const Text('ลองใหม่')),
-      ],
-    ),
-  );
-}
-
 class AsyncView<T> extends StatefulWidget {
   final Future<T> Function() load;
   final Widget Function(T data) builder;
@@ -85,7 +67,7 @@ class _AsyncViewState<T> extends State<AsyncView<T>> {
     future: future,
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
-        return const Center(child: CircularProgressIndicator());
+        return const LoadingPanel();
       }
       if (snapshot.hasError) {
         return Center(child: ErrorPanel(snapshot.error!, reload));

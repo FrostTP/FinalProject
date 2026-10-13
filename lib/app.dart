@@ -4,6 +4,7 @@ import 'config/app_theme.dart';
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
 import 'services/timeguard_service.dart';
+import 'services/home_route_observer.dart';
 import 'screens/login_screen.dart';
 import 'screens/permission_screen.dart';
 import 'screens/home_screen.dart';
@@ -48,6 +49,7 @@ class _TimeGuardAppState extends State<TimeGuardApp> {
   @override
   Widget build(BuildContext context) => MaterialApp(
     navigatorKey: navigatorKey,
+    navigatorObservers: [homeRouteObserver],
     title: 'TimeGuard',
     debugShowCheckedModeBanner: false,
     theme: AppTheme.light,
@@ -58,26 +60,7 @@ class _TimeGuardAppState extends State<TimeGuardApp> {
       future: startup,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.face_retouching_natural,
-                    size: 80,
-                    color: AppTheme.primary,
-                  ),
-                  Text(
-                    'TimeGuard',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 24),
-                  CircularProgressIndicator(),
-                ],
-              ),
-            ),
-          );
+          return const Scaffold(body: SafeArea(child: LoadingPanel()));
         }
         if (snapshot.hasError) {
           return Scaffold(
@@ -128,13 +111,27 @@ class _EmployeeShellState extends State<EmployeeShell> {
         data: widget.data,
         onNotifications: () => setState(() => index = 2),
       ),
-      HistoryScreen(data: widget.data),
+      HistoryScreen(data: widget.data, onHome: () => setState(() => index = 0)),
       NotificationsScreen(data: widget.data),
       ProfileScreen(auth: widget.auth, data: widget.data),
     ];
     return Scaffold(
       body: SafeArea(child: pages[index]),
       bottomNavigationBar: NavigationBar(
+        height: 72,
+        backgroundColor: Colors.white,
+        indicatorColor: const Color(0xFFEAF1FF),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (states) => TextStyle(
+            fontSize: 10,
+            fontWeight: states.contains(WidgetState.selected)
+                ? FontWeight.w700
+                : FontWeight.w500,
+            color: states.contains(WidgetState.selected)
+                ? AppTheme.primary
+                : const Color(0xFF98A2B3),
+          ),
+        ),
         selectedIndex: index,
         onDestinationSelected: (i) => setState(() => index = i),
         destinations: const [

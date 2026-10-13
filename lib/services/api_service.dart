@@ -5,10 +5,17 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../models/models.dart';
 
+enum ApiFailure { response, connection, timeout, invalidResponse }
+
 class ApiException implements Exception {
   final String message;
   final int? status;
-  const ApiException(this.message, [this.status]);
+  final ApiFailure failure;
+  const ApiException(
+    this.message, [
+    this.status,
+    this.failure = ApiFailure.response,
+  ]);
   @override
   String toString() => message;
 }
@@ -62,7 +69,16 @@ class ApiService {
         await clearToken();
         onUnauthorized?.call();
       }
-      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      } on FormatException {
+        throw ApiException(
+          'ข้อมูลตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง',
+          response.statusCode,
+          ApiFailure.invalidResponse,
+        );
+      }
       if (decoded is! Map<String, dynamic>) {
         throw const FormatException();
       }
@@ -74,14 +90,22 @@ class ApiService {
       }
       return decoded['data'];
     } on TimeoutException {
-      throw const ApiException('เซิร์ฟเวอร์ตอบสนองช้า กรุณาลองใหม่');
+      throw const ApiException(
+        'เซิร์ฟเวอร์ตอบสนองช้า กรุณาลองใหม่',
+        null,
+        ApiFailure.timeout,
+      );
     } on http.ClientException {
       throw const ApiException(
         'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ ตรวจสอบเครือข่ายและ URL',
+        null,
+        ApiFailure.connection,
       );
     } on FormatException {
       throw const ApiException(
         'ข้อมูลจากเซิร์ฟเวอร์ไม่ถูกต้อง ตรวจสอบการติดตั้ง PHP API',
+        null,
+        ApiFailure.invalidResponse,
       );
     }
   }

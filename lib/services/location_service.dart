@@ -2,7 +2,7 @@ import 'package:geolocator/geolocator.dart';
 import 'api_service.dart';
 
 class LocationService {
-  Future<Position> current() async {
+  Future<void> ensurePermission() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
       throw const ApiException('กรุณาเปิดตำแหน่ง GPS');
     }
@@ -16,6 +16,17 @@ class LocationService {
     if (permission == LocationPermission.denied) {
       throw const ApiException('ต้องอนุญาตตำแหน่ง GPS เพื่อลงเวลา');
     }
+  }
+
+  Stream<Position> watch() => Geolocator.getPositionStream(
+    locationSettings: const LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 3,
+    ),
+  );
+
+  Future<Position> current() async {
+    await ensurePermission();
     try {
       final p = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(

@@ -72,7 +72,7 @@ class _PermissionScreenState extends State<PermissionScreen> {
         ),
         const SizedBox(height: 8),
         const Text(
-          'เลือกอนุญาตสิทธิ์ได้ตามต้องการ ระบบจะตรวจสอบ GPS อีกครั้งก่อนลงเวลา',
+          'เพื่อให้ระบบทำงานได้อย่างถูกต้องโปรดอนุญาติสิทธิ์ต่อไปนี้',
         ),
         const SizedBox(height: 28),
         tile(
